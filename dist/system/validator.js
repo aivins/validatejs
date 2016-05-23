@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['./metadata-key', './validation-config', './validation-engine', './validation-rule', 'aurelia-metadata'], function (_export, _context) {
+  "use strict";
+
   var validationMetadataKey, ValidationConfig, ValidationEngine, ValidationRule, metadata, Validator;
 
   function _classCallCheck(instance, Constructor) {
@@ -33,9 +35,9 @@ System.register(['./metadata-key', './validation-config', './validation-engine',
           var config = metadata.getOrCreateOwn(validationMetadataKey, ValidationConfig, this.object);
           var reporter = ValidationEngine.getValidationReporter(this.object);
           if (prop) {
-            config.validate(this.object, reporter, prop);
+            return config.validate(this.object, reporter, prop);
           } else {
-            config.validate(this.object, reporter);
+            return config.validate(this.object, reporter);
           }
         };
 
@@ -107,6 +109,11 @@ System.register(['./metadata-key', './validation-config', './validation-engine',
 
         Validator.prototype.url = function url(configuration) {
           this.config.addRule(this.currentProperty, ValidationRule.url(configuration));
+          return this;
+        };
+
+        Validator.prototype.async = function async(configuration) {
+          this.config.addRule(this.currentProperty, ValidationRule.async(configuration));
           return this;
         };
 

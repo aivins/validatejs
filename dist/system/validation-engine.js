@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['./validation-reporter'], function (_export, _context) {
+  "use strict";
+
   var ValidationReporter, ValidationEngine;
 
   function _classCallCheck(instance, Constructor) {

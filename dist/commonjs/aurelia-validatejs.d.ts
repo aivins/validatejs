@@ -57,6 +57,7 @@ declare module 'aurelia-validatejs' {
     static numericality(config?: any): any;
     static presence(config?: any): any;
     static url(config?: any): any;
+    static async(config?: any): any;
   }
   export function cleanResult(data: any): any;
   export class ValidateBindingBehavior {
@@ -94,6 +95,7 @@ declare module 'aurelia-validatejs' {
     inclusion(configuration: any): any;
     exclusion(configuration: any): any;
     url(configuration: any): any;
+    async(configuration: any): any;
   }
   export function base(targetOrConfig: any, key: any, descriptor: any, rule: any): any;
   export function length(targetOrConfig: any, key: any, descriptor: any): any;

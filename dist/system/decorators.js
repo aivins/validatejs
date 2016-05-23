@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['./validation-rule', './base-decorator'], function (_export, _context) {
+  "use strict";
+
   var ValidationRule, base;
   return {
     setters: [function (_validationRule) {

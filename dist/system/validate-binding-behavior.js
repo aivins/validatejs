@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['./validation-renderer', 'aurelia-dependency-injection'], function (_export, _context) {
+  "use strict";
+
   var ValidationRenderer, inject, _dec, _class, ValidateBindingBehavior;
 
   function _classCallCheck(instance, Constructor) {

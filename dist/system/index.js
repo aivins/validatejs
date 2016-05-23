@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['./decorators', './validation-engine', 'aurelia-validation', './validator', './validation-reporter', './validation-renderer'], function (_export, _context) {
+  "use strict";
+
   var Validator, ValidateJSValidator, ValidationReporter, ValidateJSReporter;
   return {
     setters: [function (_decorators) {

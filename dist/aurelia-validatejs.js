@@ -42,16 +42,26 @@ export class ValidationConfig {
   }
   validate(instance, reporter, key) {
     let errors = [];
+    let validations = [];
     this.__validationRules__.forEach(rule => {
       if (!key || key === rule.key) {
         let result = rule.rule.validate(instance, rule.key);
         if (result) {
-          errors.push(result);
+          validations.push(result);
         }
       }
     });
-    reporter.publish(errors);
-    return errors;
+    
+    return Promise.all(validations)
+      .then(errors => {
+        errors = errors.map(error => {
+          if (!(error instanceof ValidationError)) {
+            error = new ValidationError({propertyName: error.key, message: error.error});
+          }
+          return error;
+        })
+        reporter.publish(errors.filter(val => { return val.constructor.name == "ValidationError"}));
+      })
   }
   getValidationRules() {
     return this.__validationRules__ || (this.__validationRules__ = aggregateValidationRules(this));
@@ -105,6 +115,35 @@ export class ValidationReporter {
 }
 
 import validate from 'validate.js';
+validate.async2 = function(attributes, constraints, options, propName) {
+      var v = validate;
+      options = v.extend({}, v.async2.options, options);
+
+      var WrapErrors = options.wrapErrors || function(errors) {
+        return errors;
+      };
+
+      // Removes unknown attributes
+      if (options.cleanAttributes !== false) {
+        attributes = v.cleanAttributes(attributes, constraints);
+      }
+
+      var results = v.runValidations(attributes, constraints, options);
+
+      return new v.Promise(function(resolve, reject) {
+        v.waitForResults(results).then(function() {
+          var errors = v.processValidationResults(results, options);
+          if (errors) {
+            resolve({key: propName, error: errors[propName][0]});
+          } else {
+            resolve(attributes);
+          }
+        }, function(err) {
+          reject(err);
+        });
+      });
+    };
+
 export class ValidationRule {
   name = '';
   config;
@@ -115,11 +154,19 @@ export class ValidationRule {
   validate(target, propName) {
     if (target && propName) {
       let validator = { [propName]: { [this.name]: this.config } };
-      let result = validate(target, validator);
-      if (result) {
-        let error = cleanResult(result);
-        result = new ValidationError(error);
+      let result;
+      if (this.name == "async") {
+        validate.async2.options = {cleanAttributes: false};
+        result = validate.async2(target, this.config, null, propName)
       }
+      else {
+        result = validate(target, validator);
+        if (result) {
+          let error = cleanResult(result);
+          result = Promise.resolve(new ValidationError(error));
+        }
+      }
+
       return result;
     }
     throw new Error('Invalid target or property name.');
@@ -156,6 +203,9 @@ export class ValidationRule {
   }
   static url(config = true) {
     return new ValidationRule('url', config);
+  }
+  static async(config = true) {
+    return new ValidationRule('async', config);
   }
 }
 
@@ -276,9 +326,9 @@ export class Validator {
     let config = metadata.getOrCreateOwn(validationMetadataKey, ValidationConfig, this.object);
     let reporter = ValidationEngine.getValidationReporter(this.object);
     if (prop) {
-      config.validate(this.object, reporter, prop);
+      return config.validate(this.object, reporter, prop);
     } else {
-      config.validate(this.object, reporter);
+      return config.validate(this.object, reporter);
     }
   }
   getProperties() {
@@ -336,6 +386,10 @@ export class Validator {
   }
   url(configuration) {
     this.config.addRule(this.currentProperty, ValidationRule.url(configuration));
+    return this;
+  }
+  async(configuration) {
+    this.config.addRule(this.currentProperty, ValidationRule.async(configuration));
     return this;
   }
 }

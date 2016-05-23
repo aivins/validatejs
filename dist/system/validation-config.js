@@ -1,7 +1,9 @@
 'use strict';
 
-System.register([], function (_export, _context) {
-  var ValidationConfig;
+System.register(['aurelia-validation'], function (_export, _context) {
+  "use strict";
+
+  var ValidationError, ValidationConfig;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -10,7 +12,9 @@ System.register([], function (_export, _context) {
   }
 
   return {
-    setters: [],
+    setters: [function (_aureliaValidation) {
+      ValidationError = _aureliaValidation.ValidationError;
+    }],
     execute: function () {
       _export('ValidationConfig', ValidationConfig = function () {
         function ValidationConfig() {
@@ -25,16 +29,27 @@ System.register([], function (_export, _context) {
 
         ValidationConfig.prototype.validate = function validate(instance, reporter, key) {
           var errors = [];
+          var validations = [];
           this.__validationRules__.forEach(function (rule) {
             if (!key || key === rule.key) {
               var result = rule.rule.validate(instance, rule.key);
               if (result) {
-                errors.push(result);
+                validations.push(result);
               }
             }
           });
-          reporter.publish(errors);
-          return errors;
+
+          return Promise.all(validations).then(function (errors) {
+            errors = errors.map(function (error) {
+              if (!(error instanceof ValidationError)) {
+                error = new ValidationError({ propertyName: error.key, message: error.error });
+              }
+              return error;
+            });
+            reporter.publish(errors.filter(function (val) {
+              return val.constructor.name == "ValidationError";
+            }));
+          });
         };
 
         ValidationConfig.prototype.getValidationRules = function getValidationRules() {

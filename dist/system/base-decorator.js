@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['./property-observer'], function (_export, _context) {
+  "use strict";
+
   var observeProperty;
   return {
     setters: [function (_propertyObserver) {

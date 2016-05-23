@@ -28,9 +28,9 @@ var Validator = exports.Validator = function () {
     var config = _aureliaMetadata.metadata.getOrCreateOwn(_metadataKey.validationMetadataKey, _validationConfig.ValidationConfig, this.object);
     var reporter = _validationEngine.ValidationEngine.getValidationReporter(this.object);
     if (prop) {
-      config.validate(this.object, reporter, prop);
+      return config.validate(this.object, reporter, prop);
     } else {
-      config.validate(this.object, reporter);
+      return config.validate(this.object, reporter);
     }
   };
 
@@ -102,6 +102,11 @@ var Validator = exports.Validator = function () {
 
   Validator.prototype.url = function url(configuration) {
     this.config.addRule(this.currentProperty, _validationRule.ValidationRule.url(configuration));
+    return this;
+  };
+
+  Validator.prototype.async = function async(configuration) {
+    this.config.addRule(this.currentProperty, _validationRule.ValidationRule.async(configuration));
     return this;
   };
 

@@ -21,6 +21,34 @@ define(['exports', 'validate.js', 'aurelia-validation'], function (exports, _val
     }
   }
 
+  _validate3.default.async2 = function (attributes, constraints, options, propName) {
+    var v = _validate3.default;
+    options = v.extend({}, v.async2.options, options);
+
+    var WrapErrors = options.wrapErrors || function (errors) {
+      return errors;
+    };
+
+    if (options.cleanAttributes !== false) {
+      attributes = v.cleanAttributes(attributes, constraints);
+    }
+
+    var results = v.runValidations(attributes, constraints, options);
+
+    return new v.Promise(function (resolve, reject) {
+      v.waitForResults(results).then(function () {
+        var errors = v.processValidationResults(results, options);
+        if (errors) {
+          resolve({ key: propName, error: errors[propName][0] });
+        } else {
+          resolve(attributes);
+        }
+      }, function (err) {
+        reject(err);
+      });
+    });
+  };
+
   var ValidationRule = exports.ValidationRule = function () {
     function ValidationRule(name, config) {
       _classCallCheck(this, ValidationRule);
@@ -36,11 +64,18 @@ define(['exports', 'validate.js', 'aurelia-validation'], function (exports, _val
         var _propName, _validator;
 
         var validator = (_validator = {}, _validator[propName] = (_propName = {}, _propName[this.name] = this.config, _propName), _validator);
-        var result = (0, _validate3.default)(target, validator);
-        if (result) {
-          var error = cleanResult(result);
-          result = new _aureliaValidation.ValidationError(error);
+        var result = void 0;
+        if (this.name == "async") {
+          _validate3.default.async2.options = { cleanAttributes: false };
+          result = _validate3.default.async2(target, this.config, null, propName);
+        } else {
+          result = (0, _validate3.default)(target, validator);
+          if (result) {
+            var error = cleanResult(result);
+            result = Promise.resolve(new _aureliaValidation.ValidationError(error));
+          }
         }
+
         return result;
       }
       throw new Error('Invalid target or property name.');
@@ -100,6 +135,12 @@ define(['exports', 'validate.js', 'aurelia-validation'], function (exports, _val
       var config = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
 
       return new ValidationRule('url', config);
+    };
+
+    ValidationRule.async = function async() {
+      var config = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+
+      return new ValidationRule('async', config);
     };
 
     return ValidationRule;
