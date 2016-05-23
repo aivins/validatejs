@@ -14,9 +14,9 @@ export class Validator {
     let config = metadata.getOrCreateOwn(validationMetadataKey, ValidationConfig, this.object);
     let reporter = ValidationEngine.getValidationReporter(this.object);
     if (prop) {
-      config.validate(this.object, reporter, prop);
+      return config.validate(this.object, reporter, prop);
     } else {
-      config.validate(this.object, reporter);
+      return config.validate(this.object, reporter);
     }
   }
   getProperties() {
@@ -74,6 +74,10 @@ export class Validator {
   }
   url(configuration) {
     this.config.addRule(this.currentProperty, ValidationRule.url(configuration));
+    return this;
+  }
+  async(configuration) {
+    this.config.addRule(this.currentProperty, ValidationRule.async(configuration));
     return this;
   }
 }

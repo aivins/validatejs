@@ -1,6 +1,35 @@
 import validate from 'validate.js';
 import {ValidationError} from 'aurelia-validation';
 
+validate.async2 = function(attributes, constraints, options, propName) {
+      var v = validate;
+      options = v.extend({}, v.async2.options, options);
+
+      var WrapErrors = options.wrapErrors || function(errors) {
+        return errors;
+      };
+
+      // Removes unknown attributes
+      if (options.cleanAttributes !== false) {
+        attributes = v.cleanAttributes(attributes, constraints);
+      }
+
+      var results = v.runValidations(attributes, constraints, options);
+
+      return new v.Promise(function(resolve, reject) {
+        v.waitForResults(results).then(function() {
+          var errors = v.processValidationResults(results, options);
+          if (errors) {
+            resolve({key: propName, error: errors[propName][0]});
+          } else {
+            resolve(attributes);
+          }
+        }, function(err) {
+          reject(err);
+        });
+      });
+    };
+
 export class ValidationRule {
   name = '';
   config;
@@ -11,11 +40,19 @@ export class ValidationRule {
   validate(target, propName) {
     if (target && propName) {
       let validator = { [propName]: { [this.name]: this.config } };
-      let result = validate(target, validator);
-      if (result) {
-        let error = cleanResult(result);
-        result = new ValidationError(error);
+      let result;
+      if (this.name == "async") {
+        validate.async2.options = {cleanAttributes: false};
+        result = validate.async2(target, this.config, null, propName)
       }
+      else {
+        result = validate(target, validator);
+        if (result) {
+          let error = cleanResult(result);
+          result = Promise.resolve(new ValidationError(error));
+        }
+      }
+
       return result;
     }
     throw new Error('Invalid target or property name.');
@@ -52,6 +89,9 @@ export class ValidationRule {
   }
   static url(config = true) {
     return new ValidationRule('url', config);
+  }
+  static async(config = true) {
+    return new ValidationRule('async', config);
   }
 }
 
