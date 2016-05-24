@@ -45,6 +45,10 @@ define(['exports', 'aurelia-validation'], function (exports, _aureliaValidation)
         reporter.publish(errors.filter(function (val) {
           return val.constructor.name == "ValidationError";
         }));
+
+        if (errors.length > 0) {
+          throw errors;
+        }
       });
     };
 

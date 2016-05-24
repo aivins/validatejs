@@ -26,6 +26,10 @@ export class ValidationConfig {
           return error;
         })
         reporter.publish(errors.filter(val => { return val.constructor.name == "ValidationError"}));
+
+        if (errors.length > 0) {
+          throw errors;
+        }
       })
   }
   getValidationRules() {
