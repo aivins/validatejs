@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.ValidationConfig = undefined;
 
-var _aureliaValidation = require('aurelia-validation');
+var _aureliaValidation2 = require('aurelia-validation');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -34,14 +34,17 @@ var ValidationConfig = exports.ValidationConfig = function () {
 
     return Promise.all(validations).then(function (errors) {
       errors = errors.map(function (error) {
-        if (!(error instanceof _aureliaValidation.ValidationError)) {
-          error = new _aureliaValidation.ValidationError({ propertyName: error.key, message: error.error });
+        if (!(error instanceof _aureliaValidation2.ValidationError) && error.key != undefined && error.error != undefined) {
+          error = new _aureliaValidation2.ValidationError({ propertyName: error.key, message: error.error });
         }
         return error;
       });
-      reporter.publish(errors.filter(function (val) {
-        return val.constructor.name == "ValidationError";
-      }));
+
+      errors = errors.filter(function (error) {
+        return error instanceof _aureliaValidation.ValidationError;
+      });
+
+      reporter.publish(errors);
 
       if (errors.length > 0) {
         throw errors;

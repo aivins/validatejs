@@ -12,8 +12,8 @@ System.register(['aurelia-validation'], function (_export, _context) {
   }
 
   return {
-    setters: [function (_aureliaValidation) {
-      ValidationError = _aureliaValidation.ValidationError;
+    setters: [function (_aureliaValidation2) {
+      ValidationError = _aureliaValidation2.ValidationError;
     }],
     execute: function () {
       _export('ValidationConfig', ValidationConfig = function () {
@@ -41,14 +41,17 @@ System.register(['aurelia-validation'], function (_export, _context) {
 
           return Promise.all(validations).then(function (errors) {
             errors = errors.map(function (error) {
-              if (!(error instanceof ValidationError)) {
+              if (!(error instanceof ValidationError) && error.key != undefined && error.error != undefined) {
                 error = new ValidationError({ propertyName: error.key, message: error.error });
               }
               return error;
             });
-            reporter.publish(errors.filter(function (val) {
-              return val.constructor.name == "ValidationError";
-            }));
+
+            errors = errors.filter(function (error) {
+              return error instanceof _aureliaValidation.ValidationError;
+            });
+
+            reporter.publish(errors);
 
             if (errors.length > 0) {
               throw errors;

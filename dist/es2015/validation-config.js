@@ -22,14 +22,17 @@ export let ValidationConfig = class ValidationConfig {
 
     return Promise.all(validations).then(errors => {
       errors = errors.map(error => {
-        if (!(error instanceof ValidationError)) {
+        if (!(error instanceof ValidationError) && error.key != undefined && error.error != undefined) {
           error = new ValidationError({ propertyName: error.key, message: error.error });
         }
         return error;
       });
-      reporter.publish(errors.filter(val => {
-        return val.constructor.name == "ValidationError";
-      }));
+
+      errors = errors.filter(function (error) {
+        return error instanceof _aureliaValidation.ValidationError;
+      });
+
+      reporter.publish(errors);
 
       if (errors.length > 0) {
         throw errors;
