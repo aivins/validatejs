@@ -12,8 +12,8 @@ System.register(['aurelia-validation'], function (_export, _context) {
   }
 
   return {
-    setters: [function (_aureliaValidation2) {
-      ValidationError = _aureliaValidation2.ValidationError;
+    setters: [function (_aureliaValidation) {
+      ValidationError = _aureliaValidation.ValidationError;
     }],
     execute: function () {
       _export('ValidationConfig', ValidationConfig = function () {
@@ -48,7 +48,7 @@ System.register(['aurelia-validation'], function (_export, _context) {
             });
 
             errors = errors.filter(function (error) {
-              return error instanceof _aureliaValidation.ValidationError;
+              return error instanceof ValidationError;
             });
 
             reporter.publish(errors);

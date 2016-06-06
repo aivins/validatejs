@@ -29,7 +29,7 @@ export let ValidationConfig = class ValidationConfig {
       });
 
       errors = errors.filter(function (error) {
-        return error instanceof _aureliaValidation.ValidationError;
+        return error instanceof ValidationError;
       });
 
       reporter.publish(errors);

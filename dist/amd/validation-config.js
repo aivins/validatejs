@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-validation'], function (exports, _aureliaValidation2) {
+define(['exports', 'aurelia-validation'], function (exports, _aureliaValidation) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -37,8 +37,8 @@ define(['exports', 'aurelia-validation'], function (exports, _aureliaValidation2
 
       return Promise.all(validations).then(function (errors) {
         errors = errors.map(function (error) {
-          if (!(error instanceof _aureliaValidation2.ValidationError) && error.key != undefined && error.error != undefined) {
-            error = new _aureliaValidation2.ValidationError({ propertyName: error.key, message: error.error });
+          if (!(error instanceof _aureliaValidation.ValidationError) && error.key != undefined && error.error != undefined) {
+            error = new _aureliaValidation.ValidationError({ propertyName: error.key, message: error.error });
           }
           return error;
         });
